@@ -1,45 +1,47 @@
 ---
 name: svgm
-description: Generate, validate, and mint onchain SVG NFTs on Pharos Network. Use when an agent needs to produce deterministic SVG artwork, store it fully onchain (no IPFS, no external hosting), and deploy/mint an ERC-721 token whose tokenURI returns the SVG directly. Triggers on "onchain svg", "mint svg nft", "pharos nft", "svg minter", "deploy svg collection", "onchain art", "tokenize svg", "pharos erc721 svg".
+description: Generate, validate, and mint onchain SVG NFTs on Pharos Network using Foundry. Use when an agent needs to produce deterministic SVG artwork, store it fully onchain (no IPFS, no external hosting), and deploy/mint an ERC-721 token whose tokenURI returns the SVG directly. Triggers on "onchain svg", "mint svg nft", "pharos nft", "svg minter", "deploy svg collection", "onchain art", "tokenize svg", "pharos erc721 svg", "foundry svg", "forge deploy".
 license: MIT
 metadata:
   author: yemiight02
-  version: "1.0.0"
+  version: "1.1.0"
   category: onchain-art
   chain: pharos
+  toolchain: foundry
 ---
 
 # Onchain SVG Minter (SVGM)
 
-A portable agent skill for generating onchain SVG artwork and minting it as ERC-721 NFTs directly on the Pharos Network. All metadata and image data live in the contract's storage and `tokenURI` response — no IPFS, no Arweave, no external host.
+A portable agent skill for generating onchain SVG artwork and minting it as ERC-721 NFTs directly on the Pharos Network. All metadata and image data live in the contract's storage and `tokenURI` response — no IPFS, no Arweave, no external host. The full smart-contract toolchain is **Foundry** (`forge build`, `forge test`, `forge script`); no Hardhat required.
 
 ## Network
 
-| Field | Value |
-|---|---|
-| Network | Pharos Mainnet |
-| Chain ID | 1672 |
-| RPC URL | `https://rpc.pharos.xyz` |
-| Explorer | `https://pharosscan.xyz` |
-| Currency | PROS (18 decimals) |
-| EVM | Equivalent — use standard Solidity 0.8.x tooling |
+| Field             | Value                                                |
+| ----------------- | ---------------------------------------------------- |
+| Network           | Pharos Mainnet                                       |
+| Chain ID          | 1672                                                 |
+| RPC URL           | `https://rpc.pharos.xyz`                             |
+| Explorer          | `https://pharosscan.xyz`                             |
+| Currency          | PROS (18 decimals)                                   |
+| EVM               | Equivalent — use standard Solidity 0.8.x tooling     |
+| Toolchain         | **Foundry** (`forge`, `cast`, `anvil`)               |
 
 A Pharos Atlantic Testnet configuration is also supported for pre-production testing:
 
-| Field | Value |
-|---|---|
-| Network | Pharos Atlantic Testnet |
-| Chain ID | 688688 |
-| RPC URL | `https://atlantic.dplabs-internal.com` |
-| Explorer | `https://testnet.pharosscan.xyz` |
+| Field    | Value                                  |
+| -------- | -------------------------------------- |
+| Network  | Pharos Atlantic Testnet                |
+| Chain ID | 688688                                 |
+| RPC URL  | `https://atlantic.dplabs-internal.com` |
+| Explorer | `https://testnet.pharosscan.xyz`       |
 
-All onchain actions default to mainnet; switch to testnet by overriding the `RPC_URL`, `CHAIN_ID`, and `EXPLORER_URL` environment variables described below.
+All onchain actions default to mainnet; switch to testnet by passing `--rpc-url https://atlantic.dplabs-internal.com` to `forge script`/`cast`.
 
 ## Framework
 
 - **Smart contracts**: Solidity 0.8.24, OpenZeppelin Contracts v5.x
 - **Agent runtime**: Node.js 18+ with `viem` 2.x for typed EVM interaction
-- **Tooling**: `hardhat` 2.x (compile + test), `solhint` (lint), `prettier-plugin-solidity` (format)
+- **Tooling**: **Foundry** (`forge` for build/test/script, `cast` for read calls, `anvil` for local node), `forge fmt`, `forge coverage`
 - **Standard**: ERC-721 + ERC-721URIStorage, with the onchain metadata extension where the metadata JSON itself is rendered from contract storage
 
 ## When to Use
@@ -61,112 +63,147 @@ Do **not** use this skill for IPFS-pinned NFTs, large raster images, soulbound-s
 SVGM/
 ├── skills/
 │   └── svgm/
-│       └── SKILL.md                  ← this file
+│       └── SKILL.md                       ← this file
 ├── contracts/
-│   ├── OnchainSVG.sol                ← ERC-721 with onchain SVG tokenURI
-│   ├── SVGMinter.sol                 ← factory + mint helper
+│   ├── OnchainSVG.sol                     ← ERC-721 with onchain SVG tokenURI
+│   ├── SVGMinter.sol                      ← factory + mint helper
 │   └── interfaces/
 │       └── ISVGMinter.sol
+├── script/
+│   ├── Deploy.s.sol                       ← DeployCollection + DeployFactory
+│   ├── Mint.s.sol                         ← Foundry mint script (env-driven)
+│   └── CreateCollectionViaFactory.s.sol   ← factory-driven deploy + optional first mint
+├── test/
+│   ├── OnchainSVG.t.sol                   ← unit + property fuzz (svg safety)
+│   └── SVGMinter.t.sol                    ← factory + ownership behavior
 ├── agent/
 │   ├── package.json
 │   ├── tsconfig.json
 │   ├── .env.example
 │   └── scripts/
-│       ├── generate-svg.ts           ← deterministic SVG generator
-│       ├── validate-svg.ts           ← XML well-formedness check
-│       ├── deploy-collection.ts      ← deploy OnchainSVG to Pharos
-│       ├── mint.ts                   ← mint a token (with prompt)
-│       ├── read-token.ts             ← read onchain SVG and metadata
+│       ├── generate-svg.ts                ← deterministic SVG generator
+│       ├── validate-svg.ts                ← XML well-formedness + safety check
+│       ├── deploy-collection.ts           ← viem deploy (reads Foundry out/)
+│       ├── mint.ts                        ← viem mint (reads env)
+│       ├── read-token.ts                  ← reads onchain SVG + metadata
 │       └── lib/
-│           ├── pharos.ts             ← chain config + clients
-│           ├── ipfs.ts               ← no-op (kept for parity)
+│           ├── pharos.ts                  ← chain config + clients
+│           ├── foundry-artifact.ts        ← load out/<Contract>.sol/<Contract>.json
+│           ├── ipfs.ts                    ← no-op (kept for parity)
 │           └── types.ts
+├── lib/                                   ← vendored (forge-std, OpenZeppelin)
+├── foundry.toml                           ← Foundry config (RPC endpoints, optimizer)
+├── remappings.txt                         ← forge-std/, @openzeppelin/contracts/
+├── Makefile                               ← one-liner targets (build, test, deploy, mint, verify)
+├── .env.example
+├── .github/workflows/ci.yml               ← fmt + build + test on every PR
 ├── docs/
 │   ├── ARCHITECTURE.md
 │   └── SECURITY.md
-├── hardhat.config.ts
-├── package.json
-├── .gitignore
 ├── LICENSE
 └── README.md
 ```
 
 ## Quick Start
 
-### 1. Install
+### 1. Install Foundry
+
+```bash
+curl -L https://foundry.paradigm.xyz | bash
+foundryup
+```
+
+### 2. Install the project
 
 ```bash
 git clone https://github.com/Yemiight02/SVGM
 cd SVGM
-npm install
-cd agent && npm install && cd ..
-```
-
-### 2. Configure
-
-```bash
+make install-libs   # vendors forge-std + OpenZeppelin into lib/
 cp .env.example .env
-# Required:
-#   PRIVATE_KEY              — deployer/minter EOA key
-#   PHAROS_RPC_URL           — defaults to https://rpc.pharos.xyz (mainnet)
-# Optional:
-#   CHAIN_ID                 — defaults to 1672 (mainnet). Use 688688 for testnet.
-#   EXPLORER_URL             — defaults to https://pharosscan.xyz
+# fill in PRIVATE_KEY (and PHAROS_RPC_URL if not mainnet)
 ```
 
-### 3. Compile contracts
+> If you already have `lib/` checked in (this repo vendors it), you can skip `make install-libs`.
+
+### 3. Build, test, format
 
 ```bash
-npx hardhat compile
+forge build                 # compile contracts
+forge test                  # 18 unit + property-fuzz tests, all should pass
+forge fmt                   # auto-format Solidity
+forge fmt --check           # CI-friendly: fails if any file would be reformatted
+```
+
+Or, equivalently:
+
+```bash
+make build
+make test
+make fmt
 ```
 
 ### 4. Deploy a collection
 
 ```bash
-npx hardhat run scripts/deploy.ts --network pharos
-# or use the agent wrapper:
-npx ts-node agent/scripts/deploy-collection.ts --name "Pharos Genesis" --symbol "PHG" --base-uri ""
+# Mainnet (default)
+forge script script/Deploy.s.sol:DeployCollection \
+  --rpc-url $PHAROS_RPC_URL --broadcast
+
+# With a custom name/symbol
+COLLECTION_NAME="Pixel Pals" COLLECTION_SYMBOL="PPLS" \
+  forge script script/Deploy.s.sol:DeployCollection \
+    --rpc-url $PHAROS_RPC_URL --broadcast
+
+# Or via the Makefile
+make deploy-collection NAME="Pixel Pals" SYMBOL="PPLS"
 ```
+
+The deployment script reads `PRIVATE_KEY` from your env (or `.env` via the Makefile) and broadcasts to the configured RPC. The deployed address is logged to stdout.
 
 ### 5. Mint
 
 ```bash
-# Mint with an inline SVG
-npx ts-node agent/scripts/mint.ts \
-  --collection 0xYourCollection \
-  --to 0xRecipient \
-  --svg-file ./my-art.svg
+# Mint from an inline SVG file
+COLLECTION=0xYourCollection RECIPIENT=0xRecipient \
+SVG_FILE=./art.svg TOKEN_NAME="Gen #1" TOKEN_DESC="First onchain pixel" \
+  forge script script/Mint.s.sol:Mint --rpc-url $PHAROS_RPC_URL --broadcast
 
-# Mint with a generated prompt
-npx ts-node agent/scripts/mint.ts \
-  --collection 0xYourCollection \
-  --to 0xRecipient \
-  --prompt '{"shapes":["circle","rect"],"palette":["#2F80ED","#0D0D0D","#FFFFFF"],"seed":42}'
+# Or via the Makefile
+make mint COLLECTION=0xYourCollection RECIPIENT=0xRecipient SVG_FILE=./art.svg
+
+# Mint with a generated prompt (agent-friendly)
+COLLECTION=0xYourCollection RECIPIENT=0xRecipient \
+SVG_BODY='<?xml version="1.0" encoding="UTF-8"?><svg xmlns="http://www.w3.org/2000/svg" .../>' \
+  forge script script/Mint.s.sol:Mint --rpc-url $PHAROS_RPC_URL --broadcast
 ```
 
 ### 6. Read a token
 
 ```bash
+# Quick read with cast
+cast call 0xYourCollection "tokenURI(uint256)(string)" 1 --rpc-url $PHAROS_RPC_URL
+
+# Full decode via the agent runtime
 npx ts-node agent/scripts/read-token.ts --collection 0xYourCollection --token-id 1
 ```
 
 ## Programmatic Use
 
-### Generate SVG
+### Generate SVG (Node)
 
 ```typescript
 import { generateSVG } from "./agent/scripts/generate-svg";
 
 const svg = generateSVG({
-  shapes: ["circle", "rect", "polygon"],
-  palette: ["#2F80ED", "#0D0D0D", "#F5F5F5"],
-  seed: 7,
-  size: 512,
+    shapes: ["circle", "rect", "polygon"],
+    palette: ["#2F80ED", "#0D0D0D", "#F5F5F5"],
+    seed: 7,
+    size: 512,
 });
 // returns a well-formed SVG string (UTF-8, XML-safe)
 ```
 
-### Validate SVG
+### Validate SVG (Node)
 
 ```typescript
 import { validateSVG } from "./agent/scripts/validate-svg";
@@ -175,22 +212,22 @@ const { ok, errors } = validateSVG(svgString);
 if (!ok) throw new Error(`Invalid SVG: ${errors.join(", ")}`);
 ```
 
-### Mint on Pharos
+### Mint on Pharos (Node)
 
 ```typescript
 import { createPublicClient, createWalletClient, http } from "viem";
-import { pharosMainnet } from "./agent/lib/pharos";
+import { pharosMainnet } from "./agent/scripts/lib/pharos";
 import { mintSVG } from "./agent/scripts/mint";
 
 const publicClient = createPublicClient({ chain: pharosMainnet, transport: http() });
 const walletClient = createWalletClient({ chain: pharosMainnet, transport: http(), account });
 
 const { txHash, tokenId } = await mintSVG({
-  publicClient,
-  walletClient,
-  collection: "0xYourCollection",
-  to: "0xRecipient",
-  svg: svgString,
+    publicClient,
+    walletClient,
+    collection: "0xYourCollection",
+    to: "0xRecipient",
+    svg: svgString,
 });
 console.log(`Minted token #${tokenId} → https://pharosscan.xyz/tx/${txHash}`);
 ```
@@ -202,6 +239,7 @@ console.log(`Minted token #${tokenId} → https://pharosscan.xyz/tx/${txHash}`);
 ```solidity
 function mint(address to, string calldata svg) external returns (uint256 tokenId);
 function mintWithMetadata(address to, string calldata svg, string calldata name, string calldata description) external returns (uint256 tokenId);
+function setMetadata(uint256 tokenId, string calldata name, string calldata description) external;
 function tokenURI(uint256 tokenId) external view returns (string memory);
 function totalSupply() external view returns (uint256);
 event Minted(address indexed to, uint256 indexed tokenId, string svgHash);
@@ -216,46 +254,51 @@ function createCollection(string calldata name, string calldata symbol, address 
 function mintTo(address collection, address to, string calldata svg) external returns (uint256 tokenId);
 ```
 
-Use `SVGMinter` when an agent needs to deploy fresh collections on the fly without keeping a separate factory deployment per project.
+Use `SVGMinter` when an agent needs to deploy fresh collections on the fly. Note: `mintTo` is permissionless on the factory, but the underlying `OnchainSVG.mint` is `onlyOwner`. The intended mint path is either (a) the collection owner calls `OnchainSVG.mint` directly, or (b) deploy collections via the factory and mint through `OnchainSVG`. The Foundry test suite documents this with explicit revert assertions.
 
 ## Agent Workflow
 
 When the user asks the agent to do anything in the onchain-SVG-NFT space, the recommended flow is:
 
 1. **Plan**: clarify whether the user wants a new collection, a single mint, or a generated artwork
-2. **Generate** (if no SVG supplied): call `generateSVG` with a structured prompt
-3. **Validate**: always run `validateSVG` before sending a transaction
-4. **Estimate gas**: use `publicClient.estimateContractGas` to fail fast on out-of-gas
-5. **Send**: call `mint` or `mintTo` on the deployed collection
-6. **Confirm**: wait for the receipt and return the Pharoscan link
+2. **Build** (once per session): `forge build` — produces `out/OnchainSVG.sol/OnchainSVG.json`
+3. **Generate** (if no SVG supplied): call `generateSVG` with a structured prompt
+4. **Validate**: always run `validateSVG` before sending a transaction
+5. **Estimate gas**: use `publicClient.estimateContractGas` to fail fast on out-of-gas
+6. **Send**: call `mint` (or `mintWithMetadata`) on the deployed collection via `forge script script/Mint.s.sol`
+7. **Confirm**: wait for the receipt and return the Pharoscan link
 
 ## Security Notes
 
-- The onchain SVG is stored as a string and may be expensive. Keep individual SVGs under ~24 KB to stay safely within Pharos block gas limits at the time of writing.
+- The onchain SVG is stored as a string and may be expensive. Keep individual SVGs under ~24 KiB to stay safely within Pharos block gas limits.
 - The minter is `Ownable`; the deployer retains admin rights. Agents should disclose ownership to the user before deploying.
-- Do not include `<script>` tags in SVGs — they will be rejected by `validateSVG`. The contract itself strips any `<script>` / `on*=` attributes as a defense-in-depth measure.
+- Do not include `<script>` tags in SVGs — they will be rejected by `validateSVG` *and* by `_enforceSafe` in the contract (defense in depth).
 - See `docs/SECURITY.md` for the full threat model.
 
 ## Environment Variables
 
-| Variable | Required | Default | Description |
-|---|---|---|---|
-| `PRIVATE_KEY` | yes | — | EOA key used for deploy/mint (hex, with or without `0x`) |
-| `PHAROS_RPC_URL` | no | `https://rpc.pharos.xyz` | JSON-RPC endpoint |
-| `CHAIN_ID` | no | `1672` | `1672` mainnet, `688688` testnet |
-| `EXPLORER_URL` | no | `https://pharosscan.xyz` | Used to build transaction links |
-| `GAS_LIMIT_BUFFER` | no | `120` | Percent buffer added to `estimateGas` |
-| `SVG_MAX_BYTES` | no | `24576` | Reject SVGs larger than this |
+| Variable            | Required | Default                              | Description                                                     |
+| ------------------- | -------- | ------------------------------------ | --------------------------------------------------------------- |
+| `PRIVATE_KEY`       | yes      | —                                    | EOA key used for deploy/mint (hex, with or without `0x`)        |
+| `PHAROS_RPC_URL`    | no       | `https://rpc.pharos.xyz`             | JSON-RPC endpoint                                               |
+| `CHAIN_ID`          | no       | `1672`                               | `1672` mainnet, `688688` testnet                                |
+| `EXPLORER_URL`      | no       | `https://pharosscan.xyz`             | Used to build transaction links                                 |
+| `GAS_LIMIT_BUFFER`  | no       | `120`                                | Percent buffer added to `estimateGas` (agent runtime only)      |
+| `SVG_MAX_BYTES`     | no       | `24576`                              | Reject SVGs larger than this (24 KiB)                           |
+| `PHAROSCAN_API_KEY` | no       | —                                    | API key for `forge verify-contract` on Pharoscan                |
+| `FORGE_ARTIFACT_PATH` | no     | `out/OnchainSVG.sol/OnchainSVG.json` | Override the artifact path used by the agent deploy-collection   |
 
 ## Limitations
 
 - Pure EVM only — no Stylus, no WASM contracts.
-- Designed for 1-of-1 mints; no batch minting helper in v1.
+- Designed for 1-of-1 mints; no batch minting helper in this version.
 - The skill ships with one deterministic generator (shapes + palette + seed). Plug your own generator in `agent/scripts/generate-svg.ts` if you need parametric / trait-based output.
 
 ## Resources
 
 - Pharos docs: https://docs.pharos.xyz
+- Pharos Foundry guide: https://docs.pharos.xyz/developer-guide/foundry
 - Pharos mainnet explorer: https://pharosscan.xyz
 - OpenZeppelin Contracts: https://docs.openzeppelin.com/contracts
+- Foundry book: https://book.getfoundry.sh
 - viem: https://viem.sh

@@ -1,47 +1,31 @@
-# Security
+# SVGM — Security Model
 
 ## Threat Model
 
-SVGM is an onchain SVG NFT skill. The most realistic threats are:
+| Threat                                            | Mitigation                                                                                                                              |
+| ------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| Malicious SVG content (XSS in wallets/marketplaces) | Two layers: agent-side `validateSVG` rejects `<script>`, `javascript:`, and `on*=`; on-chain `_enforceSafe` rejects `<script>`, `javascript:`, and `onerror=`. |
+| SVG storage bloat → out-of-gas mint                | 24 KiB cap enforced in both layers.                                                                                                     |
+| Unauthorized mint                                  | `OnchainSVG.mint` / `mintWithMetadata` / `setMetadata` are all `onlyOwner`.                                                            |
+| Private key leak via commit                        | `.env` is git-ignored. CI never has access to `PRIVATE_KEY`. Foundry's `forge script` reads it from the env at run time only.          |
+| Block-explorer API key leak                        | `PHAROSCAN_API_KEY` is optional and treated as a secret. Never hard-code.                                                              |
+| Replay of mint tx on testnet                      | Each tx is freshly signed; the chain id is part of the EIP-155 signature, so a mainnet-signed tx is invalid on testnet and vice versa. |
+| Front-running of `createCollection`                | The factory deployment is independent of subsequent mints; front-running the deploy only changes the collection address, not the admin. |
+| SVG hash collision                                 | `_hashOf` is non-cryptographic and used only as an event-log fingerprint. The canonical SVG is in the event data, not the hash.        |
 
-1. **Malicious SVG payloads** — an attacker crafts an SVG that runs JavaScript, drains a wallet, or abuses an XSS sink in a downstream viewer.
-2. **Oversize SVGs** — an attacker submits an SVG that would push a single transaction past the block gas limit, effectively bricking the collection.
-3. **Unauthorized minting** — an attacker mints to a collection they do not own.
-4. **Key leakage** — the deployer's private key is committed to source control or printed in logs.
-5. **Chain mismatch** — the agent accidentally signs a transaction on the wrong chain (e.g. mainnet when testnet was intended).
+## Ownership Disclosure
 
-## Mitigations
+The `Ownable` admin of each `OnchainSVG` collection is the address passed as the third constructor argument (`collectionOwner`). When an agent deploys a collection:
 
-### Malicious SVG payloads
+- If the user supplied `--owner 0x...`, that address is the admin.
+- Otherwise the agent's EOA (from `PRIVATE_KEY`) is the admin.
 
-- The `validate-svg.ts` script rejects SVGs containing `<script>`, `javascript:` URIs, or `on*=` event-handler attributes.
-- `OnchainSVG._enforceSafe` enforces the same rules in the contract as defense in depth.
-- The onchain sanitizer lowercases the input before substring-matching, so obfuscation (`<SCRIPT>`, `<sCrIpT>`) does not bypass it.
+Agents **must disclose this to the user** before deploying. The deploy script logs the admin address to stdout.
 
-### Oversize SVGs
+## Sanitization Limits
 
-- A 24 KB cap (`SVG_MAX_BYTES`, default `24576`) is enforced both client-side and onchain.
-- Minting SVGs that exceed the cap reverts with `SVGTooLarge(size, max)`.
+The current `_enforceSafe` is intentionally simple (substring search on lowercased text). It catches the obvious XSS vectors but is **not a general HTML/SVG sanitizer**. If you accept user-supplied SVGs from untrusted sources, run them through a proper sanitizer (e.g. DOMPurify in a sandboxed environment) *before* calling `mint`.
 
-### Unauthorized minting
+## Reporting
 
-- `OnchainSVG.mint` and `OnchainSVG.mintWithMetadata` are `onlyOwner`.
-- `agent/scripts/mint.ts` reads `owner()` from the chain before signing and aborts if the caller is not the owner.
-- The factory (`SVGMinter`) does not bypass ownership — it simply calls the collection's `mint`, so the collection owner still has to be the transaction signer.
-
-### Key leakage
-
-- Private keys are read from `PRIVATE_KEY` only. The default `.env.example` ships with an empty value.
-- `.env` is git-ignored.
-- Logs and error messages never print the private key.
-
-### Chain mismatch
-
-- `agent/scripts/lib/pharos.ts` resolves the chain from a typed `PharosNetwork` enum. The default is `"mainnet"`.
-- The chain id is part of the typed `Chain` object passed to viem, so signing on the wrong chain is a hard error rather than a silent mistake.
-
-## Out of Scope
-
-- Reentrancy in the mint path — `mint` performs a state change and then an external call to `_safeMint`. `onERC721Received` callbacks from the recipient are out of scope.
-- Frontend / wallet integration. SVGM returns data URIs and assumes the caller (marketplace, wallet, agent UI) renders them safely.
-- The deterministic SVG generator is for convenience only. Do not mint AI-generated art that the user has not approved.
+Found a vulnerability? Open a GitHub issue marked `security` or DM the maintainer. Please do not open public PRs with proof-of-concept exploits.
