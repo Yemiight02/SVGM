@@ -1,23 +1,23 @@
 {
-  "name": "@svgm/agent",
-  "version": "1.0.0",
-  "description": "Onchain SVG Minter — agent runtime for Pharos Network (viem-based)",
-  "license": "MIT",
-  "private": true,
-  "type": "commonjs",
-  "scripts": {
-    "generate": "ts-node scripts/generate-svg.ts",
-    "validate": "ts-node scripts/validate-svg.ts",
-    "deploy": "ts-node scripts/deploy-collection.ts",
-    "mint": "ts-node scripts/mint.ts",
-    "read": "ts-node scripts/read-token.ts"
-  },
-  "dependencies": {
-    "viem": "^2.52.2"
-  },
-  "devDependencies": {
-    "@types/node": "^20.19.42",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.9.3"
-  }
+    "name": "@svgm/agent",
+    "version": "1.1.0",
+    "description": "Onchain SVG Minter — agent runtime for Pharos Network (viem-based, Foundry-compatible)",
+    "license": "MIT",
+    "private": true,
+    "type": "commonjs",
+    "scripts": {
+        "generate": "ts-node scripts/generate-svg.ts",
+        "validate": "ts-node scripts/validate-svg.ts",
+        "deploy": "ts-node scripts/deploy-collection.ts",
+        "mint": "ts-node scripts/mint.ts",
+        "read": "ts-node scripts/read-token.ts"
+    },
+    "dependencies": {
+        "viem": "^2.52.2"
+    },
+    "devDependencies": {
+        "@types/node": "^20.19.42",
+        "ts-node": "^10.9.2",
+        "typescript": "^5.9.3"
+    }
 }

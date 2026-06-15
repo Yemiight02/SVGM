@@ -1,0 +1,53 @@
+[profile.default]
+src = "contracts"
+	out = "out"
+	libs = ["lib"]
+	test = "test"
+	script = "script"
+	solc_version = "0.8.24"
+	evm_version = "cancun"
+	optimizer = true
+	optimizer_runs = 200
+	via_ir = true
+	bytecode_hash = "ipfs"
+	cbor_metadata = true
+	sparse_mode = false
+
+[fmt]
+	line_length = 120
+	tab_width = 4
+	bracket_spacing = false
+	int_types = "long"
+	quote_style = "double"
+	number_underscore = "thousands"
+	multiline_func_header = "params_first"
+	wrap_comments = true
+
+# Pharos mainnet (default for any forge script invocation).
+[rpc_endpoints]
+	pharos_mainnet = "https://rpc.pharos.xyz"
+	pharos_testnet = "https://atlantic.dplabs-internal.com"
+	local_anvil     = "http://127.0.0.1:8545"
+
+[etherscan]
+	pharos_mainnet = {key = "${PHAROSCAN_API_KEY}", url = "https://pharosscan.xyz", chain = 1672}
+	pharos_testnet = {key = "${PHAROSCAN_API_KEY}", url = "https://testnet.pharosscan.xyz", chain = 688688}
+
+# Verbose traces are noisy in CI; default is fine, agents can pass -vvv.
+
+# Fuzz defaults — generous so the property tests actually exercise edge cases.
+[fuzz]
+	runs = 256
+	max_test_rejects = 65536
+	seed = "0xC0FFEE"
+
+[invariant]
+	runs = 64
+	depth = 32
+	fail_on_revert = false
+	call_override = false
+	shrink_run_limit = 5000
+
+[doc]
+	out = "docs/contract-api"
+	title = "SVGM — Onchain SVG Minter"

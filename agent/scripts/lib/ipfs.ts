@@ -5,5 +5,5 @@
  * `agent/scripts/lib/ipfs` don't break.
  */
 export function uploadToIPFS(_data: string | Uint8Array): Promise<{ cid: string; uri: string }> {
-  return Promise.resolve({ cid: "onchain", uri: "data:application/octet-stream;base64," });
+    return Promise.resolve({ cid: "onchain", uri: "data:application/octet-stream;base64," });
 }

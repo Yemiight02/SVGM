@@ -1,10 +1,12 @@
-node_modules/
-artifacts/
+# Foundry
+out/
 cache/
-typechain-types/
-coverage/
-coverage.json
-package-lock.json
+broadcast/
+docs/contract-api/
+
+# Dependencies
+node_modules/
+lib/forge-std/lib/
 agent/package-lock.json
 
 # Env
@@ -14,22 +16,23 @@ agent/package-lock.json
 agent/.env
 agent/.env.local
 
-# Build
-dist/
-build/
-out/
-
 # Editor
 .vscode/
 .idea/
 *.swp
 .DS_Store
 
-# Hardhat
-deployments/
-
 # Logs
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-*.log
+
+# Coverage
+coverage/
+coverage.json
+lcov.info
+
+# Foundry deployments (per-chain JSON receipts go here, but is regenerated)
+deployments/local/
+deployments/anvil/

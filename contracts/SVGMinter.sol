@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
-import "./OnchainSVG.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {OnchainSVG} from "./OnchainSVG.sol";
 
 /// @title SVGMinter
 /// @notice Factory + mint helper. Lets an agent deploy a fresh `OnchainSVG`
@@ -16,10 +16,10 @@ contract SVGMinter is Ownable {
     constructor() Ownable(msg.sender) {}
 
     /// @notice Deploy a new OnchainSVG collection.
-    /// @param name The collection name (ERC-721 name)
-    /// @param symbol The collection ticker (ERC-721 symbol)
-    /// @param collectionOwner The address that will own admin rights on the new collection
-    /// @return collection The address of the newly deployed OnchainSVG
+    /// @param  name            The collection name (ERC-721 name)
+    /// @param  symbol          The collection ticker (ERC-721 symbol)
+    /// @param  collectionOwner The address that will own admin rights on the new collection
+    /// @return collection      The address of the newly deployed OnchainSVG
     function createCollection(
         string calldata name,
         string calldata symbol,
