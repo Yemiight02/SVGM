@@ -28,11 +28,15 @@ contract OnchainSVG is ERC721, ERC721URIStorage, Ownable {
     mapping(uint256 tokenId => TokenData data) private _tokens;
 
     event Minted(address indexed to, uint256 indexed tokenId, string svgHash);
+    event BatchMinted(address indexed to, uint256 fromTokenId, uint256 toTokenId);
     event MetadataUpdated(uint256 indexed tokenId);
 
     error EmptySVG();
     error SVGTooLarge(uint256 size, uint256 max);
     error ForbiddenSVGContent();
+    error EmptyBatch();
+    error BatchLengthMismatch(uint256 recipientsLen, uint256 svgsLen);
+    error BatchTooLarge(uint256 size, uint256 max);
 
     /// @param collectionName   ERC-721 collection name (e.g. "Pharos Genesis")
     /// @param collectionSymbol ERC-721 collection symbol (e.g. "PHG")
@@ -63,6 +67,72 @@ contract OnchainSVG is ERC721, ERC721URIStorage, Ownable {
         string calldata description
     ) external onlyOwner returns (uint256 tokenId) {
         return _mintInternal(to, svg, name, description);
+    }
+
+    /// @notice Maximum number of tokens that can be minted in a single batch.
+    /// @dev    Bounded to keep `mintBatch` gas usage below the Pharos block gas limit
+    ///         when each SVG is at or near the 24 KiB cap.
+    uint256 public constant MAX_BATCH_SIZE = 50;
+
+    /// @notice Mint a batch of tokens to a single recipient, all sharing the same SVG.
+    /// @dev    Useful for fixed-edition drops where every NFT in the batch is
+    ///         visually identical. Each token is minted independently and the
+    ///         per-token safety / size checks apply. A single `BatchMinted` event
+    ///         is emitted covering the inclusive range `[fromTokenId, toTokenId]`.
+    /// @param  to      Recipient address (must not be the zero address).
+    /// @param  svg     The fully-onchain SVG payload, identical for every token.
+    /// @param  count   Number of tokens to mint. Must be 1..MAX_BATCH_SIZE.
+    /// @return fromTokenId The first tokenId minted in the batch.
+    /// @return toTokenId   The last tokenId minted in the batch (inclusive).
+    function mintBatch(
+        address to,
+        string calldata svg,
+        uint256 count
+    ) external onlyOwner returns (uint256 fromTokenId, uint256 toTokenId) {
+        if (count == 0) revert EmptyBatch();
+        if (count > MAX_BATCH_SIZE) revert BatchTooLarge(count, MAX_BATCH_SIZE);
+        // Per-svg safety + size checks are run inside _mintInternal; doing them
+        // once before the loop saves gas on repeated identical input.
+        _enforceSize(svg);
+        _enforceSafe(svg);
+        if (bytes(svg).length == 0) revert EmptySVG();
+
+        fromTokenId = _nextTokenId;
+        for (uint256 i = 0; i < count; i++) {
+            uint256 tokenId = _nextTokenId++;
+            _safeMint(to, tokenId);
+            _tokens[tokenId] = TokenData({svg: svg, name: "", description: ""});
+            emit Minted(to, tokenId, _hashOf(svg));
+        }
+        toTokenId = _nextTokenId - 1;
+        emit BatchMinted(to, fromTokenId, toTokenId);
+    }
+
+    /// @notice Mint a batch of distinct tokens, one per (recipient, svg) pair.
+    /// @dev    For collections where every token is unique. `recipients` and
+    ///         `svgs` must have the same length; batch size is capped at
+    ///         `MAX_BATCH_SIZE` to keep total gas predictable.
+    /// @param  recipients Array of recipient addresses.
+    /// @param  svgs       Array of onchain SVG payloads (same length as `recipients`).
+    /// @return fromTokenId The first tokenId minted.
+    /// @return toTokenId   The last tokenId minted (inclusive).
+    function mintBatchDistinct(
+        address[] calldata recipients,
+        string[] calldata svgs
+    ) external onlyOwner returns (uint256 fromTokenId, uint256 toTokenId) {
+        uint256 n = recipients.length;
+        if (n == 0) revert EmptyBatch();
+        if (n != svgs.length) revert BatchLengthMismatch(recipients.length, svgs.length);
+        if (n > MAX_BATCH_SIZE) revert BatchTooLarge(n, MAX_BATCH_SIZE);
+
+        fromTokenId = _nextTokenId;
+        for (uint256 i = 0; i < n; i++) {
+            // _mintInternal enforces empty/size/safety on every SVG; if any one
+            // item is bad, the whole batch reverts and nothing is minted.
+            _mintInternal(recipients[i], svgs[i], "", "");
+        }
+        toTokenId = _nextTokenId - 1;
+        emit BatchMinted(recipients[0], fromTokenId, toTokenId);
     }
 
     /// @notice Update the metadata of an existing token. Caller must own admin rights.

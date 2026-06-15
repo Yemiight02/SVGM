@@ -239,11 +239,24 @@ console.log(`Minted token #${tokenId} → https://pharosscan.xyz/tx/${txHash}`);
 ```solidity
 function mint(address to, string calldata svg) external returns (uint256 tokenId);
 function mintWithMetadata(address to, string calldata svg, string calldata name, string calldata description) external returns (uint256 tokenId);
+function mintBatch(address to, string calldata svg, uint256 count) external returns (uint256 fromTokenId, uint256 toTokenId);
+function mintBatchDistinct(address[] calldata recipients, string[] calldata svgs) external returns (uint256 fromTokenId, uint256 toTokenId);
 function setMetadata(uint256 tokenId, string calldata name, string calldata description) external;
 function tokenURI(uint256 tokenId) external view returns (string memory);
 function totalSupply() external view returns (uint256);
+function MAX_BATCH_SIZE() external pure returns (uint256);
 event Minted(address indexed to, uint256 indexed tokenId, string svgHash);
+event BatchMinted(address indexed to, uint256 fromTokenId, uint256 toTokenId);
 ```
+
+#### Batch minting
+
+Two flavors of batch mint, both `onlyOwner` and both cap at `MAX_BATCH_SIZE = 50`:
+
+- `mintBatch(to, svg, count)` — fixed-edition drop. Mints `count` tokens, all sharing the same onchain SVG, to a single recipient. Cheap because size + safety checks run once before the loop.
+- `mintBatchDistinct(recipients, svgs)` — one token per pair. Arrays must be the same length. **Atomic**: if any single item is empty / oversize / forbidden, the whole batch reverts and nothing is minted.
+
+For both, a single `BatchMinted(to, fromTokenId, toTokenId)` event is emitted after the loop, in addition to the per-token `Minted` events.
 
 The contract returns a fully-formed `data:application/json;base64,...` URI from `tokenURI`, embedding the SVG and metadata in a single response. This means marketplaces and wallets see the artwork without any external fetch.
 

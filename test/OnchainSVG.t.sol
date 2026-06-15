@@ -200,6 +200,129 @@ contract OnchainSVGTest is Test {
         }
     }
 
+    // -- batch mint -----------------------------------------------------------
+
+    function test_MintBatch_HappyPath() public {
+        vm.prank(owner);
+        (uint256 fromId, uint256 toId) = c.mintBatch(user, SAMPLE, 5);
+        assertEq(fromId, 1, "fromTokenId");
+        assertEq(toId, 5, "toTokenId");
+        assertEq(c.totalSupply(), 5, "totalSupply");
+
+        // Every minted token must have the same tokenURI body.
+        for (uint256 id = 1; id <= 5; id++) {
+            assertEq(c.ownerOf(id), user, "owner");
+            assertTrue(_startsWith(c.tokenURI(id), "data:application/json;base64,"), "uri prefix");
+        }
+    }
+
+    function test_MintBatch_EmitsBatchMintedEvent() public {
+        vm.expectEmit(true, false, false, true, address(c));
+        emit OnchainSVG.BatchMinted(user, 1, 3);
+
+        vm.prank(owner);
+        c.mintBatch(user, SAMPLE, 3);
+    }
+
+    function test_MintBatch_RevertsOnZeroCount() public {
+        vm.prank(owner);
+        vm.expectRevert(OnchainSVG.EmptyBatch.selector);
+        c.mintBatch(user, SAMPLE, 0);
+    }
+
+    function test_MintBatch_RevertsOnCountAboveCap() public {
+        // Read the constant BEFORE the prank so the single-call prank
+        // is still active when we hit mintBatch.
+        uint256 maxBatch = c.MAX_BATCH_SIZE();
+        vm.prank(owner);
+        vm.expectRevert(abi.encodeWithSelector(OnchainSVG.BatchTooLarge.selector, maxBatch + 1, maxBatch));
+        c.mintBatch(user, SAMPLE, maxBatch + 1);
+    }
+
+    function test_MintBatch_RevertsOnOversizeSvg() public {
+        string memory tooBig = _repeat("a", 24_577);
+        vm.prank(owner);
+        vm.expectRevert(abi.encodeWithSelector(OnchainSVG.SVGTooLarge.selector, 24_577, 24_576));
+        c.mintBatch(user, tooBig, 1);
+    }
+
+    function test_MintBatch_RevertsOnForbiddenContent() public {
+        string memory evil = string(
+            '<?xml version="1.0" encoding="UTF-8"?>' '<svg xmlns="http://www.w3.org/2000/svg">'
+            "<script>alert(1)</script></svg>"
+        );
+        vm.prank(owner);
+        vm.expectRevert(OnchainSVG.ForbiddenSVGContent.selector);
+        c.mintBatch(user, evil, 1);
+    }
+
+    function test_MintBatch_RevertsWhenCallerIsNotOwner() public {
+        vm.prank(attacker);
+        vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, attacker));
+        c.mintBatch(user, SAMPLE, 3);
+    }
+
+    function test_MintBatch_AtomicNoMintOnBadItem() public {
+        // If the second SVG in a distinct batch is bad, the whole tx reverts
+        // and the first (good) item is NOT minted.
+        string memory good = SAMPLE;
+        string memory evil = string(
+            '<?xml version="1.0" encoding="UTF-8"?>' '<svg xmlns="http://www.w3.org/2000/svg">'
+            "<script>x</script></svg>"
+        );
+        address[] memory recipients = new address[](2);
+        recipients[0] = user;
+        recipients[1] = attacker;
+        string[] memory svgs = new string[](2);
+        svgs[0] = good;
+        svgs[1] = evil;
+
+        vm.prank(owner);
+        vm.expectRevert(OnchainSVG.ForbiddenSVGContent.selector);
+        c.mintBatchDistinct(recipients, svgs);
+        assertEq(c.totalSupply(), 0, "no partial mints on revert");
+    }
+
+    function test_MintBatchDistinct_HappyPath() public {
+        address[] memory recipients = new address[](3);
+        recipients[0] = user;
+        recipients[1] = attacker;
+        recipients[2] = makeAddr("third-party");
+        string[] memory svgs = new string[](3);
+        svgs[0] = SAMPLE;
+        svgs[1] = SAMPLE;
+        svgs[2] = SAMPLE;
+
+        vm.prank(owner);
+        (uint256 fromId, uint256 toId) = c.mintBatchDistinct(recipients, svgs);
+        assertEq(fromId, 1);
+        assertEq(toId, 3);
+        assertEq(c.ownerOf(1), user);
+        assertEq(c.ownerOf(2), attacker);
+        assertEq(c.ownerOf(3), recipients[2]);
+    }
+
+    function test_MintBatchDistinct_RevertsOnLengthMismatch() public {
+        address[] memory recipients = new address[](2);
+        recipients[0] = user;
+        recipients[1] = attacker;
+        string[] memory svgs = new string[](1);
+        svgs[0] = SAMPLE;
+
+        vm.prank(owner);
+        vm.expectRevert(abi.encodeWithSelector(OnchainSVG.BatchLengthMismatch.selector, 2, 1));
+        c.mintBatchDistinct(recipients, svgs);
+    }
+
+    function test_MintBatchDistinct_RevertsOnEmptyBatch() public {
+        address[] memory recipients = new address[](0);
+        string[] memory svgs = new string[](0);
+
+        vm.prank(owner);
+        vm.expectRevert(OnchainSVG.EmptyBatch.selector);
+        c.mintBatchDistinct(recipients, svgs);
+    }
+
     // -- helpers --------------------------------------------------------------
 
     function _startsWith(

@@ -142,6 +142,20 @@ npx ts-node agent/scripts/read-token.ts --collection 0xYourCollection --token-id
 
 The response includes the onchain `tokenURI`, the decoded metadata JSON, and a `data:image/svg+xml;base64,...` image URI that can be opened directly in any browser.
 
+### 6. Batch mint (fixed edition)
+
+```bash
+# Mints 10 identical tokens to RECIPIENT, all with the same SVG.
+# Cap is MAX_BATCH_SIZE = 50 per call.
+COLLECTION=0xYourCollection RECIPIENT=0xRecipient COUNT=10 \
+SVG_FILE=./art.svg TOKEN_NAME="Edition 1" TOKEN_DESC="First 10 of the series" \
+  forge script script/Mint.s.sol:MintBatch --rpc-url $PHAROS_RPC_URL --broadcast
+
+# Or via the Makefile:
+make mint-batch COLLECTION=0xYourCollection RECIPIENT=0xRecipient \
+     COUNT=10 SVG_FILE=./art.svg
+```
+
 ## Skill Loading
 
 The `skills/svgm/SKILL.md` file is the consumable unit. Any agent runtime that follows the standard skill format (YAML frontmatter + Markdown body) can load it. Key metadata:
@@ -221,7 +235,7 @@ console.log(result.explorerUrl);
 ## Limitations
 
 - EVM only. No Stylus, no WASM contracts.
-- 1-of-1 mints in this version — no batch minting helper yet.
+- 1-of-1 mints in v1; **v1.1 adds `mintBatch` and `mintBatchDistinct`** (up to 50 per call, fully onchain).
 - The default SVG generator is shape + palette + seed based. Plug a richer generator into `agent/scripts/generate-svg.ts` for trait / parametric output.
 
 ## License

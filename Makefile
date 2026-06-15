@@ -144,6 +144,28 @@ mint-testnet: ## Mint on Atlantic testnet.
 		--rpc-url $(PHAROS_TESTNET_RPC) \
 		--broadcast
 
+.PHONY: mint-batch
+mint-batch: ## Mint a fixed-edition batch of identical NFTs. Needs COLLECTION, RECIPIENT, COUNT, and (SVG_FILE or SVG_BODY).
+	@test -n "$(COLLECTION)" || (echo "COLLECTION=<addr> required"; exit 1)
+	@test -n "$(RECIPIENT)" || (echo "RECIPIENT=<addr> required"; exit 1)
+	@test -n "$(COUNT)" || (echo "COUNT=<n> required (1..50)"; exit 1)
+	@test -n "$(SVG_FILE)$(SVG_BODY)" || (echo "SVG_FILE=<path> or SVG_BODY=<svg> required"; exit 1)
+	@test -n "$$PRIVATE_KEY" || (echo "PRIVATE_KEY not set in .env"; exit 1)
+	$(FORGE) script script/Mint.s.sol:MintBatch \
+		--rpc-url $(PHAROS_MAINNET_RPC) \
+		--broadcast
+
+.PHONY: mint-batch-testnet
+mint-batch-testnet: ## Batch-mint on Atlantic testnet.
+	@test -n "$(COLLECTION)" || (echo "COLLECTION=<addr> required"; exit 1)
+	@test -n "$(RECIPIENT)" || (echo "RECIPIENT=<addr> required"; exit 1)
+	@test -n "$(COUNT)" || (echo "COUNT=<n> required (1..50)"; exit 1)
+	@test -n "$(SVG_FILE)$(SVG_BODY)" || (echo "SVG_FILE=<path> or SVG_BODY=<svg> required"; exit 1)
+	@test -n "$$PRIVATE_KEY" || (echo "PRIVATE_KEY not set in .env"; exit 1)
+	$(FORGE) script script/Mint.s.sol:MintBatch \
+		--rpc-url $(PHAROS_TESTNET_RPC) \
+		--broadcast
+
 # --- Read a token -----------------------------------------------------------
 .PHONY: read
 read: ## Read onchain token data. Requires COLLECTION and TOKEN_ID.
