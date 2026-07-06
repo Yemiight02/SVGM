@@ -1,0 +1,25 @@
+{
+    "name": "@svgm/agent",
+    "version": "2.0.0",
+    "description": "SVGM agent runtime for Pharos Network — viem-based, Foundry-compatible. Service-Agent-callable.",
+    "license": "MIT",
+    "private": true,
+    "type": "commonjs",
+    "main": "lib/pharos.js",
+    "scripts": {
+        "build": "tsc -p tsconfig.json",
+        "generate": "ts-node ./generate-svg.ts",
+        "validate": "ts-node ./validate-svg.ts",
+        "deploy": "ts-node ./deploy-collection.ts",
+        "mint": "ts-node ./mint.ts",
+        "read": "ts-node ./read-token.ts"
+    },
+    "dependencies": {
+        "viem": "^2.52.2"
+    },
+    "devDependencies": {
+        "@types/node": "^20.19.42",
+        "ts-node": "^10.9.2",
+        "typescript": "^5.9.3"
+    }
+}
