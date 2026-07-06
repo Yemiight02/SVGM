@@ -129,8 +129,10 @@ The Service Agent expects:
 - **Skill zip**: `svgm.zip` (produced from `skills/svgm/`)
 - **Live demo**: https://cyphza0y83hv.space.minimax.io
 - **YouTube walkthrough**: (see Phase 1 BUIDL submission)
-- **Mainnet sample deploy**: `0xc9A0B63d91c2A808dD631d031f037944fedDaA12`
-  (creator `0xa9307dfA8677783c10C073bBFf597702bd0b3673`)
+- **On-chain status (2026-07-06)**: no mainnet deploy yet. The
+  Foundry migration was a static build (compile + test + zip), not a
+  broadcast. A live testnet deploy is pending PROS funding; see
+  `references/SUBMISSION.md` for the plan.
 - **Anvita Flow Developer Console**: https://flow.anvita.xyz/service-agents
 - **Anvita On user chat**: https://flow.anvita.xyz/agent/chat
 - **Wallet & earnings dashboard**: https://flow.anvita.xyz/dashboard

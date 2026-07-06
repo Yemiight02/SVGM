@@ -82,6 +82,6 @@ npm install --no-audit --no-fund --omit=optional
 | Artifact               | URL                                                          |
 | ---------------------- | ------------------------------------------------------------ |
 | Demo page              | https://cyphza0y83hv.space.minimax.io                        |
-| Pharos mainnet deploy  | `0xc9A0B63d91c2A808dD631d031f037944fedDaA12` (creator `0xa9307dfA8677783c10C073bBFf597702bd0b3673`) |
+| On-chain status         | No live deploy on Pharos yet (Foundry build only). Testnet deploy pending PROS funding. |
 | YouTube demo           | (uploaded; see Phase 1 BUIDL submission)                     |
 | Anvita Flow console    | https://flow.anvita.xyz/service-agents                       |
