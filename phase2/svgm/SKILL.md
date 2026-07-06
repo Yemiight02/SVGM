@@ -209,7 +209,7 @@ npx ts-node agent/scripts/read-token.ts --collection 0xYourCollection --token-id
 ### Generate SVG
 
 ```typescript
-import { generateSVG } from "./agent/scripts/generate-svg";
+import { generateSVG } from "./scripts/generate-svg";
 
 const svg = generateSVG({
   shapes: ["circle", "rect", "polygon"],
@@ -223,7 +223,7 @@ const svg = generateSVG({
 ### Validate SVG
 
 ```typescript
-import { validateSVG } from "./agent/scripts/validate-svg";
+import { validateSVG } from "./scripts/validate-svg";
 
 const { ok, errors } = validateSVG(svgString);
 if (!ok) throw new Error(`Invalid SVG: ${errors.join(", ")}`);
@@ -233,8 +233,8 @@ if (!ok) throw new Error(`Invalid SVG: ${errors.join(", ")}`);
 
 ```typescript
 import { createPublicClient, createWalletClient, http } from "viem";
-import { pharosMainnet } from "./agent/scripts/lib/pharos";
-import { mintSVG } from "./agent/scripts/mint";
+import { pharosMainnet } from "./scripts/lib/pharos";
+import { mintSVG, mintBatchSVG, mintBatchDistinctSVG } from "./scripts/mint";
 
 const publicClient = createPublicClient({
   chain: pharosMainnet, transport: http(),
@@ -243,6 +243,7 @@ const walletClient = createWalletClient({
   chain: pharosMainnet, transport: http(), account,
 });
 
+// Single mint
 const { txHash, tokenId } = await mintSVG({
   publicClient, walletClient,
   collection: "0xYourCollection",
@@ -250,6 +251,16 @@ const { txHash, tokenId } = await mintSVG({
   svg: svgString,
 });
 console.log(`Minted #${tokenId} → https://pharosscan.xyz/tx/${txHash}`);
+
+// Batch mint (fixed-edition)
+const batch = await mintBatchSVG({
+  publicClient, walletClient,
+  collection: "0xYourCollection",
+  to: "0xRecipient",
+  svg: svgString,
+  count: 10,        // max 50 (MAX_BATCH_SIZE)
+});
+console.log(`Minted ${batch.fromTokenId}..${batch.toTokenId} → ${batch.explorerUrl}`);
 ```
 
 ## Contract API
@@ -331,9 +342,10 @@ onchain-SVG-NFT space, follow this flow:
    forbidden tags.
 5. **Estimate gas** — use `publicClient.estimateContractGas` to fail
    fast on out-of-gas before the user pays.
-6. **Send** — call `mint` (or `mintWithMetadata`, `mintBatch`,
-   `mintBatchDistinct`) on the deployed collection via
-   `forge script script/Mint.s.sol`.
+6. **Send** — call `mintSVG` (or `mintWithMetadata`,
+   `mintBatchSVG`, `mintBatchDistinctSVG`) from the runtime, or
+   invoke the Foundry scripts at `script/Mint.s.sol` for env-driven
+   deploys.
 7. **Confirm** — wait for the receipt and return the Pharoscan link.
 
 ### x402 Payment (Anvita Flow)

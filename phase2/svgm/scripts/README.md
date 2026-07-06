@@ -32,13 +32,23 @@ workarounds (no native build tools; we use `viem` which is JS-only).
 ```typescript
 import { generateSVG } from "./generate-svg";
 import { validateSVG } from "./validate-svg";
-import { mintSVG } from "./mint";
+import { mintSVG, mintBatchSVG, mintBatchDistinctSVG, MAX_BATCH_SIZE } from "./mint";
 import { deployCollection } from "./deploy-collection";
 import { readToken } from "./read-token";
 ```
 
-All five are exported as ESM functions. They expect a Pharos RPC and a
+All of the above are exported as CommonJS functions (the runtime uses
+`type: "commonjs"` in `package.json`). They expect a Pharos RPC and a
 funded `PRIVATE_KEY` (via env or explicit `account` param).
+
+### Batch exports
+
+- `mintSVG(opts)` — single mint, `opts.count` ignored
+- `mintBatchSVG(opts)` — same SVG to one recipient, capped at
+  `MAX_BATCH_SIZE = 50`
+- `mintBatchDistinctSVG(opts)` — one token per (recipient, svg) pair,
+  atomic; `opts.recipients.length === opts.svgs.length` required
+- `MAX_BATCH_SIZE` — exported constant (matches the on-chain value)
 
 ## Use as a CLI
 
@@ -47,6 +57,7 @@ npx ts-node ./generate-svg.ts --seed 42 --out ./art.svg
 npx ts-node ./validate-svg.ts ./art.svg
 npx ts-node ./deploy-collection.ts --name "Test" --symbol "TST"
 npx ts-node ./mint.ts --collection 0x... --to 0x... --svg-file ./art.svg
+npx ts-node ./mint.ts --collection 0x... --to 0x... --svg-file ./art.svg --count 10
 npx ts-node ./read-token.ts --collection 0x... --token-id 1
 ```
 
@@ -68,13 +79,15 @@ GAS_LIMIT_BUFFER=120
 When invoked by an Anvita Flow Steward Agent, each operation maps to
 one x402 charge (configured in the Developer Console Agent Card):
 
-| Steward request                  | Runtime call             |
-| -------------------------------- | ------------------------ |
-| "Generate an SVG with seed N"    | `generateSVG({ seed: N })` |
-| "Validate this SVG"              | `validateSVG(svg)`       |
-| "Deploy a collection"            | `deployCollection({...})` |
-| "Mint token #N to address"       | `mintSVG({...})`         |
-| "Read token #N metadata"         | `readToken({...})`       |
+| Steward request                  | Runtime call                       |
+| -------------------------------- | ---------------------------------- |
+| "Generate an SVG with seed N"    | `generateSVG({ seed: N })`         |
+| "Validate this SVG"              | `validateSVG(svg)`                 |
+| "Deploy a collection"            | `deployCollection({...})`          |
+| "Mint token #N to address"       | `mintSVG({...})`                   |
+| "Batch-mint 10 of the same SVG"  | `mintBatchSVG({ count: 10 })`      |
+| "Mint to 5 different recipients" | `mintBatchDistinctSVG({...})`      |
+| "Read token #N metadata"         | `readToken({...})`                 |
 
 The runtime returns plain JSON-serializable objects so the Steward
 Agent can stream results back to the user.

@@ -49,9 +49,9 @@ operations. Each is metered separately under x402.
 | `generate_svg`            | `generateSVG({ shapes, palette, seed, size })`     | Deterministic SVG art (no chain action, off-chain only)                   |
 | `validate_svg`            | `validateSVG(svgString)`                           | XML well-formedness + safety check (rejects `<script>`, oversize)         |
 | `deploy_collection`       | `deployCollection({ name, symbol, owner? })`       | Deploy a new ERC-721 with onchain SVG tokenURI to Pharos                  |
-| `mint`                    | `mintSVG({ collection, to, svg, name?, desc? })`   | Mint a single token to an existing collection                             |
-| `mint_batch`              | `mintBatch({ collection, to, svg, count })`        | Mint up to 50 tokens of the same SVG to one recipient                     |
-| `mint_batch_distinct`     | `mintBatchDistinct({ collection, recipients, svgs })` | Mint one token per recipient (atomic — all-or-nothing)                  |
+| `mint`                    | `mintSVG({ collection, to, svg, name?, desc? })`         | Mint a single token to an existing collection                             |
+| `mint_batch`              | `mintBatchSVG({ collection, to, svg, count })`          | Mint up to 50 tokens of the same SVG to one recipient (`MAX_BATCH_SIZE`) |
+| `mint_batch_distinct`     | `mintBatchDistinctSVG({ collection, recipients, svgs })`| Mint one token per recipient (atomic — all-or-nothing)                    |
 | `read_token`              | `readToken({ collection, tokenId })`               | Read onchain SVG + metadata for a given token ID                          |
 
 ## Example tasks (paste 3-5 into the console)
