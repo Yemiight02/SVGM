@@ -100,10 +100,10 @@ Before publishing to the marketplace:
 - [x] SKILL.md frontmatter valid (YAML, name + description + license)
 - [x] Live demo page
 - [x] YouTube video URL ready
-- [ ] Push the Phase 2 SKILL.md update to GitHub main (commit `phase2-skill-zip`)
-- [ ] Add `phase2-skill-zip` tag pointing at the Phase 2 submission
-- [ ] Consider also pushing the `svgm.zip` artifact as a GitHub Release
-- [ ] Add a `phase2/` folder in the repo with the same content as `svgm/` for transparency (optional but nice for judges)
+- [x] Phase 2 package pushed to GitHub `main` (commits `9cae695`, `f786db6`, `114ab4c`, `4e18899`, `8b8d846`)
+- [ ] Add a `v2.0.0` tag pointing at HEAD (optional — judges like clean version numbers)
+- [ ] Push the `svgm.zip` artifact as a GitHub Release (optional — Phase 2 reviewers can also rebuild from `phase2/svgm/`)
+- [x] `phase2/` folder in the repo with the same content as `svgm/` for transparency
 
 ## J. Critical don'ts
 
