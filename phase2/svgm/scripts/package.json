@@ -5,7 +5,7 @@
     "license": "MIT",
     "private": true,
     "type": "commonjs",
-    "main": "lib/pharos.js",
+    "main": "generate-svg.js",
     "scripts": {
         "build": "tsc -p tsconfig.json",
         "generate": "ts-node ./generate-svg.ts",
