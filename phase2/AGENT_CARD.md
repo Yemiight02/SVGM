@@ -127,7 +127,9 @@ The Service Agent expects:
 
 - **Source**: https://github.com/Yemiight02/SVGM
 - **Skill zip**: `svgm.zip` (produced from `skills/svgm/`)
-- **Live demo**: https://cyphza0y83hv.space.minimax.io
+- **Live demo**:
+  - GitHub Pages: https://yemiight02.github.io/SVGM/
+  - Also live: https://s415j4kw7g5p.space.minimax.io
 - **YouTube walkthrough**: (see Phase 1 BUIDL submission)
 - **On-chain status (2026-07-06)**: no mainnet deploy yet. The
   Foundry migration was a static build (compile + test + zip), not a

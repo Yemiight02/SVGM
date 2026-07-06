@@ -81,7 +81,8 @@ npm install --no-audit --no-fund --omit=optional
 
 | Artifact               | URL                                                          |
 | ---------------------- | ------------------------------------------------------------ |
-| Demo page              | https://cyphza0y83hv.space.minimax.io                        |
+| Demo pages             | https://yemiight02.github.io/SVGM/ (GitHub Pages, primary)
+|                        | https://s415j4kw7g5p.space.minimax.io (also live)            |
 | On-chain status         | No live deploy on Pharos yet (Foundry build only). Testnet deploy pending PROS funding. |
 | YouTube demo           | (uploaded; see Phase 1 BUIDL submission)                     |
 | Anvita Flow console    | https://flow.anvita.xyz/service-agents                       |

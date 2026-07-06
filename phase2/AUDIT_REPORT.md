@@ -178,7 +178,7 @@ All consistent. Doc references to deprecated addresses were fixed in commit `8b8
 | `https://docs.openzeppelin.com/contracts` | standard reference ✅ |
 | `https://viem.sh` | standard reference ✅ |
 | `https://docs.claude.com/.../agent-skills/overview` | standard reference ✅ |
-| `https://cyphza0y83hv.space.minimax.io` (live demo) | live ✅ |
+| `https://yemiight02.github.io/SVGM/` (live demo, primary) | live ✅ |
 
 All URLs healthy.
 
@@ -203,7 +203,7 @@ Both fixed in commit `4e18899`. `npm run build` now works end-to-end.
 **Action item (blocking on-chain verification):**
 - Need testnet PROS funding to do a real broadcast
 - Recommended: `forge script script/Deploy.s.sol:DeployCollection --rpc-url https://atlantic.dplabs-internal.com --broadcast` on Atlantic testnet
-- This is **NOT blocking submission** — the static demo at `cyphza0y83hv.space.minimax.io` is the working artifact. Anvita Flow's Developer Console doesn't require a live on-chain deploy for upload.
+- This is **NOT blocking submission** — the static demos at `yemiight02.github.io/SVGM/` and `s415j4kw7g5p.space.minimax.io` are the working artifacts. Anvita Flow's Developer Console doesn't require a live on-chain deploy for upload.
 
 ### 11. Pre-Submission Checklist Reconciliation ✅ PASS
 
