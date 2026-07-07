@@ -87,25 +87,18 @@ npx ts-node ./validate-svg.ts /tmp/svgm-termux-test.svg
 ls -la /tmp/svgm-termux-test.svg
 
 # 6. Build the Anvita-Flow-ready zip (top-level `svgm/` folder)
-#    Anvita expects `name: svgm` at the zip root, so we zip from
-#    inside phase2/ and let svgm/ be the top-level folder.
+#    We're inside phase2/. Zipping `svgm/` from here gives us
+#    exactly the layout Anvita Flow's Skills spec wants — a
+#    folder named after the skill at the zip root.
 cd ../..
-zip -r /tmp/svgm-phase2.zip phase2/svgm/ \
+zip -r /tmp/svgm.zip svgm/ \
     -x "*.DS_Store" "*.git/*" \
-    "phase2/svgm/scripts/node_modules/*" \
-    "phase2/svgm/scripts/dist/*" 2>/dev/null
-# Re-zip stripping phase2/ prefix so the resulting root folder is svgm/
-mkdir -p /tmp/svgm-repack
-cd /tmp/svgm-repack
-unzip -q -o /tmp/svgm-phase2.zip
-mv phase2/svgm ./svgm
-rmdir phase2 2>/dev/null
-zip -r /tmp/svgm-phase2-final.zip svgm/ \
-    -x "*.DS_Store" "*.git/*" "scripts/node_modules/*" "scripts/dist/*"
-ls -la /tmp/svgm-phase2-final.zip
-unzip -l /tmp/svgm-phase2-final.zip | head -3
-unzip -l /tmp/svgm-phase2-final.zip | tail -3
-echo "  ^ This is the file you upload to Anvita Flow Developer Console."
+    "svgm/scripts/node_modules/*" \
+    "svgm/scripts/dist/*"
+ls -la /tmp/svgm.zip
+unzip -l /tmp/svgm.zip | head -3
+unzip -l /tmp/svgm.zip | tail -3
+echo "  ^ THIS is the file you upload to Anvita Flow Developer Console."
 
 echo ""
 echo "✅ SVGM Phase 2 Termux setup complete."
