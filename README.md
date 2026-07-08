@@ -76,7 +76,10 @@ SVGM/
 
 ```bash
 # 1. Install Foundry (one-time)
-curl -L https://foundry.paradigm.xyz | bash
+# Download first, inspect, then run
+curl -L https://foundry.paradigm.xyz -o foundryup.sh
+# Optional: cat foundryup.sh | head -20   # inspect before running
+sh foundryup.sh
 foundryup
 
 # 2. Clone and set up

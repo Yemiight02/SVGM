@@ -112,7 +112,10 @@ mint you need:
 ```bash
 # 7a. Install Foundry (Termux can compile it but is slow; easier to
 #     use a Linux box to build, copy the out/ artifact over)
-curl -L https://foundry.paradigm.xyz | bash
+# Download first, inspect, then run
+curl -L https://foundry.paradigm.xyz -o foundryup.sh
+# Optional: cat foundryup.sh | head -20   # inspect before running
+sh foundryup.sh
 foundryup
 cd ../..   # back to repo root
 forge build
@@ -178,7 +181,7 @@ SVG_FILE=./agent/svgm-test.svg TOKEN_NAME="Genesis #1" \
 |---------|-----|
 | `npm install` complains about gyp/python | Ensure you ran `npm install --omit=optional` (the skip is critical on Termux) |
 | `tsc` not found | `npm install --save-dev typescript` then `npx tsc` |
-| `forge: command not found` | Run `foundryup` after `curl -L ... | bash`, then `source ~/.bashrc` |
+| `forge: command not found` | Run `sh foundryup.sh` (after `curl -L ... -o foundryup.sh`), then `source ~/.bashrc` |
 | `git push` asks for password | SSH key isn't installed — go to github.com/settings/keys |
 | `node_modules/.cache` warnings | Safe to ignore; they come from ts-node |
 | `cannot read property 'toLowerCase'` on a random RPC error | Means the testnet RPC rejected the request; usually a rate-limit, just retry |
