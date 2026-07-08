@@ -130,7 +130,7 @@ The Service Agent expects:
 - **Live demo**:
   - GitHub Pages: https://yemiight02.github.io/SVGM/
   - Also live: https://s415j4kw7g5p.space.minimax.io
-- **YouTube walkthrough**: (see Phase 1 BUIDL submission)
+- **Demo video (YouTube)**: [SVGM — Onchain SVG Minter Service Agent for Pharos (Phase 2 Demo)](https://youtu.be/mP7Um8ELviQ)  *(Phase 2 submission deliverable, ~75–90s)*
 - **On-chain status (2026-07-06)**: no mainnet deploy yet. The
   Foundry migration was a static build (compile + test + zip), not a
   broadcast. A live testnet deploy is pending PROS funding; see
@@ -148,4 +148,3 @@ The Service Agent expects:
 
 (Use the public handles above; no personal name on the marketplace
 card.)
-- **Demo video (YouTube)**: [SVGM — Onchain SVG Minter Service Agent for Pharos (Phase 2 Demo)](https://youtu.be/mP7Um8ELviQ)  *(Phase 2 submission deliverable)*
