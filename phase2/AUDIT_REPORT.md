@@ -179,6 +179,7 @@ All consistent. Doc references to deprecated addresses were fixed in commit `8b8
 | `https://viem.sh` | standard reference ✅ |
 | `https://docs.claude.com/.../agent-skills/overview` | standard reference ✅ |
 | `https://yemiight02.github.io/SVGM/` (live demo, primary) | live ✅ |
+| `https://youtu.be/mP7Um8ELviQ` (Phase 2 demo video) | live ✅ |
 
 All URLs healthy.
 

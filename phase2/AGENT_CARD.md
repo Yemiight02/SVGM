@@ -148,3 +148,4 @@ The Service Agent expects:
 
 (Use the public handles above; no personal name on the marketplace
 card.)
+- **Demo video (YouTube)**: [SVGM — Onchain SVG Minter Service Agent for Pharos (Phase 2 Demo)](https://youtu.be/mP7Um8ELviQ)  *(Phase 2 submission deliverable)*

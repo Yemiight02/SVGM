@@ -117,3 +117,4 @@ Before publishing to the marketplace:
   native currency.
 - **Don't** skip the testnet deploy step — even if mainnet works, you
   want a known-good testnet run before publishing.
+- [x] Phase 2 demo video uploaded: [SVGM — Onchain SVG Minter Service Agent for Pharos (Phase 2 Demo)](https://youtu.be/mP7Um8ELviQ)

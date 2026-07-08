@@ -83,6 +83,8 @@ npm install --no-audit --no-fund --omit=optional
 | ---------------------- | ------------------------------------------------------------ |
 | Demo pages             | https://yemiight02.github.io/SVGM/ (GitHub Pages, primary)
 |                        | https://s415j4kw7g5p.space.minimax.io (also live)            |
+| Demo video (YouTube)   | [SVGM — Onchain SVG Minter Service Agent for Pharos (Phase 2 Demo)](https://youtu.be/mP7Um8ELviQ) (Phase 2 recording, ~75–90 sec)        |
+|                        | https://s415j4kw7g5p.space.minimax.io (also live)            |
 | On-chain status         | No live deploy on Pharos yet (Foundry build only). Testnet deploy pending PROS funding. |
 | YouTube demo           | (uploaded; see Phase 1 BUIDL submission)                     |
 | Anvita Flow console    | https://flow.anvita.xyz/service-agents                       |
